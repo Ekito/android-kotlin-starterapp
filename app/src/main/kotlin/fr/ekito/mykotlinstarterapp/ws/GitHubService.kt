@@ -1,5 +1,6 @@
 package fr.ekito.injector.kotlinapp.ws
 
+import fr.ekito.mykotlinstarterapp.ws.Github
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -9,6 +10,6 @@ import retrofit2.http.Path
  */
 interface GitHubService {
 
-    @GET("users/{user}/repos")
-    fun listRepos(@Path("user") user: String): Call<List<Repo>>
+    @GET("users/{user}")
+    fun listRepos(@Path("user") user: String): Call<List<Github>>
 }
