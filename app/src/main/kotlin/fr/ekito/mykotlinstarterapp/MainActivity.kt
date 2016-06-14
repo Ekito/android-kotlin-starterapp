@@ -6,13 +6,17 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import fr.ekito.mykotlinstarterapp.ws.Github
+import fr.ekito.injector.kotlinapp.ws.Repo
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        val user = "octocat"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,13 +29,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onSnackbarClick(view: View) {
+        showBar(view,"start ...")
 
-        Injector.githubWS.listRepos("octocat").enqueue(object : Callback<List<Github>> {
-            override fun onResponse(call: Call<List<Github>>, response: Response<List<Github>>) {
+        Injector.githubWS.listRepos(user).enqueue(object : Callback<List<Repo>> {
+            override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
                 showBar(view, "Ok : ${call.request().body()}")
             }
 
-            override fun onFailure(call: Call<List<Github>>, t: Throwable) {
+            override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
                 showBar(view, "failed : $t")
             }
         })
