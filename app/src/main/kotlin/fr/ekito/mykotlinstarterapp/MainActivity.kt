@@ -24,22 +24,18 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            onSnackbarClick(view)
+            showBar(view,"start ...")
+
+            Injector.githubWS.listRepos(user).enqueue(object : Callback<List<Repo>> {
+                override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
+                    showBar(view, "Ok : ${call.request().body()}")
+                }
+
+                override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
+                    showBar(view, "failed : $t")
+                }
+            })
         }
-    }
-
-    fun onSnackbarClick(view: View) {
-        showBar(view,"start ...")
-
-        Injector.githubWS.listRepos(user).enqueue(object : Callback<List<Repo>> {
-            override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
-                showBar(view, "Ok : ${call.request().body()}")
-            }
-
-            override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
-                showBar(view, "failed : $t")
-            }
-        })
     }
 
     private fun showBar(view: View, msg: String) {
