@@ -4,6 +4,7 @@ import fr.ekito.injector.kotlinapp.ws.GitHubService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 /**
@@ -11,22 +12,21 @@ import retrofit2.converter.gson.GsonConverterFactory
  */
 object Injector {
 
-    val githubWS: GitHubService by lazy { initGithubWS(httpClient()) }
+    val githubWS: GitHubService = initGithubWS(httpClient()) //by lazy { initGithubWS(httpClient()) }
 
     fun httpClient(): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BASIC
-
         val httpClient = OkHttpClient.Builder().addInterceptor(loggingInterceptor).build()
         return httpClient
     }
 
     fun initGithubWS(httpClient: OkHttpClient): GitHubService {
-
-        val gsonConverterFactory = GsonConverterFactory.create()
         val retrofit = Retrofit.Builder()
                 .baseUrl("https://api.github.com/")
-                .client(httpClient).addConverterFactory(gsonConverterFactory)
+                .client(httpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build()
 
         val service = retrofit.create<GitHubService>(GitHubService::class.java)

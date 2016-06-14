@@ -6,11 +6,9 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import fr.ekito.injector.kotlinapp.ws.Repo
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,17 +22,14 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            showBar(view,"start ...")
+            showBar(view, "start ...")
 
-            Injector.githubWS.listRepos(user).enqueue(object : Callback<List<Repo>> {
-                override fun onResponse(call: Call<List<Repo>>, response: Response<List<Repo>>) {
-                    showBar(view, "Ok : ${call.request().body()}")
-                }
+            Injector.githubWS.listRepos(user)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .doOnError { e -> println("error : $e") }
+                    .subscribe { repo -> showBar(view, "got ${repo} !") }
 
-                override fun onFailure(call: Call<List<Repo>>, t: Throwable) {
-                    showBar(view, "failed : $t")
-                }
-            })
         }
     }
 
