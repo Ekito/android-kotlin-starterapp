@@ -3,6 +3,7 @@ package fr.ekito.mykotlinstarterapp
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,29 +12,33 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
-
-    companion object {
-        val user = "octocat"
-    }
+    val TAG = this.javaClass.simpleName
+    val user = "octocat"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            showBar(view, "start ...")
-
-            Injector.githubWS.listRepos(user)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .doOnError { e -> println("error : $e") }
-                    .subscribe { repo -> showBar(view, "got ${repo} !") }
-
-        }
+        fab.setOnClickListener { view -> onFabClick(view) }
     }
 
-    private fun showBar(view: View, msg: String) {
+    fun onFabClick(view: View) {
+        showBar(view, "start ws ...")
+        Injector.githubWS.listRepos(user)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .doOnError { error -> showBar(view, "error : $error") }
+                .doOnCompleted { Log.i(TAG,"ws terminated") }
+                .subscribe { list ->
+                    val msg = "got ${list.size} result(s) !"
+                    Log.i(TAG, msg)
+                    showBar(view, msg)
+                }
+    }
+
+    fun showBar(view: View, msg: String) {
+        Log.d(TAG,"show bar with text : $msg")
         Snackbar.make(view, msg, Snackbar.LENGTH_LONG).setAction("Action", null).show()
     }
 
@@ -44,16 +49,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true
+        when(item.itemId){
+            R.id.action_settings -> return true
+            else -> return super.onOptionsItemSelected(item)
         }
-
-        return super.onOptionsItemSelected(item)
     }
 }
