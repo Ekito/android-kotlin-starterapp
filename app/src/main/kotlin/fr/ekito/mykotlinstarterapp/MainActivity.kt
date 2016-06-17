@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     fun onFabClick(view: View) {
         showBar(view, "start ws ...")
+
         Injector.githubWS.listRepos(user)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
