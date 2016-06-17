@@ -10,6 +10,7 @@ import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     val TAG = this.javaClass.simpleName
@@ -29,8 +30,13 @@ class MainActivity : AppCompatActivity() {
         Injector.githubWS.listRepos(user)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .doOnError { error -> showBar(view, "error : $error") }
-                .doOnCompleted { Log.i(TAG,"ws terminated") }
+//                .doOnError { error -> showBar(view, "error : $error") }
+                .onErrorReturn { error ->
+                    showBar(view, "got error : $error")
+                    Log.e(TAG,"return empty list")
+                    ArrayList()
+                }
+                .doOnCompleted { Log.i(TAG, "ws terminated") }
                 .subscribe { list ->
                     val msg = "got ${list.size} result(s) !"
                     Log.i(TAG, msg)
@@ -39,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showBar(view: View, msg: String) {
-        Log.d(TAG,"show bar with text : $msg")
+        Log.i(TAG, "show bar with text : $msg")
         Snackbar.make(view, msg, Snackbar.LENGTH_LONG).setAction("Action", null).show()
     }
 
@@ -50,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
+        when (item.itemId) {
             R.id.action_settings -> return true
             else -> return super.onOptionsItemSelected(item)
         }
